@@ -3,8 +3,11 @@ from services.measurement import calculate_area, calculate_distance
 import os
 import shutil
 
-app = FastAPI(title="Aereo Geospatial Measurement API")
-
+app = FastAPI(
+    title="Aereo Geospatial Measurement API",
+    description="Backend API for measuring area and distance from uploaded geospatial files.",
+    version="1.0.0"
+)
 
 ALLOWED_EXTENSIONS = {".geojson", ".json", ".shp"}
 
@@ -17,8 +20,7 @@ def validate_file(filename):
 
     if extension not in ALLOWED_EXTENSIONS:
         raise ValueError(
-            "Unsupported file type. "
-            "Allowed types: .geojson, .json, .shp"
+            "Unsupported file type. Allowed types: .geojson, .json, .shp"
         )
 
 
