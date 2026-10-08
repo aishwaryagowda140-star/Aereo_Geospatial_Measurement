@@ -24,6 +24,21 @@ def validate_file(filename):
         )
 
 
+def save_uploaded_file(file: UploadFile):
+    """
+    Save the uploaded file temporarily.
+    """
+
+    validate_file(file.filename)
+
+    file_path = os.path.join("uploads", file.filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return file_path
+
+
 @app.get("/")
 def home():
     return {
@@ -40,13 +55,10 @@ def health_check():
 
 @app.post("/measure/area")
 async def measure_area(file: UploadFile = File(...)):
+    file_path = None
+
     try:
-        validate_file(file.filename)
-
-        file_path = os.path.join("uploads", file.filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        file_path = save_uploaded_file(file)
 
         result = calculate_area(file_path)
 
@@ -61,16 +73,17 @@ async def measure_area(file: UploadFile = File(...)):
             detail=str(e)
         )
 
+    finally:
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
+
 
 @app.post("/measure/distance")
 async def measure_distance(file: UploadFile = File(...)):
+    file_path = None
+
     try:
-        validate_file(file.filename)
-
-        file_path = os.path.join("uploads", file.filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        file_path = save_uploaded_file(file)
 
         result = calculate_distance(file_path)
 
@@ -84,3 +97,7 @@ async def measure_distance(file: UploadFile = File(...)):
             status_code=400,
             detail=str(e)
         )
+
+    finally:
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
